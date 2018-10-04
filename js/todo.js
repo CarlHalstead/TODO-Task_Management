@@ -47,10 +47,10 @@ function addTask(title, description, dueDate){
 		Create a HTML element with this layout
 
 		<div>
-			<h4 class="padded-text">Example Task Title</h4>
+			<h3 class="padded-text">Example Task Title</h3>
+			<h4 class="padded-text">Due Date: 2018-10-3</h4>
 			<p class="padded-text">Example Task Description - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus justo lacus, pretium sit amet volutpat quis, vulputate at enim. Suspendisse.</p>
-			<h5 class="padded-text">Due Date: 2018-10-3</h5>
-
+			
 			<br />
 
 			<button id="btnCompleteTask" class="btn btn-success" type="button">Complete Task</button>
@@ -63,11 +63,11 @@ function addTask(title, description, dueDate){
 	const outerDiv = document.createElement("div");
 	outerDiv.id = title.toLowerCase();
 
-	const titleElement = document.createElement("h4");
+	const titleElement = document.createElement("h3");
 	titleElement.classList.add("padded-text");
 	titleElement.innerText = title;
 
-	const dueElement = document.createElement("h5");
+	const dueElement = document.createElement("h4");
 	dueElement.classList.add("padded-text");
 	dueElement.innerText = `Due Date: ${dueDate}`;
 
@@ -117,6 +117,13 @@ function doesTaskExist(title){
 	return element != null;
 }
 
+function getTaskElement(title){
+	if(!doesTaskExist(title))
+		return null;
+
+	return document.getElementById(title.toLowerCase());
+}
+
 function completeTaskAtTitle(title){
 	console.log('Completing task: ' + title);
 }
@@ -126,9 +133,17 @@ function completeTaskAtIndex(index){
 }
 
 function removeTaskAtTitle(title){
-	console.log('Removing task: ' + title);
+	if(!doesTaskExist(title))
+		return;
+
+	const taskElement = getTaskElement(title);
+	existingTasks.removeChild(taskElement);
 }
 
 function removeTaskAtIndex(index){
-	console.log('Removing task at index: ' + index);
+	if(existingTasks.childElementCount <= index)
+		return;
+
+	const taskElement = existingTasks.childNodes[index];
+	existingTasks.removeChild(taskElement);
 }
