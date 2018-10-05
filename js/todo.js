@@ -2,9 +2,6 @@
 	LIBRARIES/FRAMEWORKS USED:
 		* Bootstrap (https://getbootstrap.com/docs/3.3/)
 		* Lodash 	(https://lodash.com)
-
-	LINKS/RESOURCES:
-		* Downloading a file without a server (https://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server)
  */
 
 /*
