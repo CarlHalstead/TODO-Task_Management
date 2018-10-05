@@ -2,7 +2,19 @@
 	LIBRARIES/FRAMEWORKS USED:
 		* Bootstrap (https://getbootstrap.com/docs/3.3/)
 		* Lodash 	(https://lodash.com)
-*/
+
+	LINKS/RESOURCES:
+		* Downloading a file without a server (https://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server)
+ */
+
+/*
+	@Refactor
+	Currently, our data is stored in our HTML. I think this is a bad way of
+	doing it. When we add a task, it should be added to an array first
+	before adding the new task to the webpage. As opposed to what we are doing 
+	now, which is store this information in the page and extract it when we want
+	to export this information.
+ */
 
 function body_OnLoad(){
 	const NUM_OF_EXAMPLES = 10;
@@ -11,7 +23,7 @@ function body_OnLoad(){
 		addTask(
 			`Example Task ${i}`, 
 			'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus justo lacus, pretium sit amet volutpat quis, vulputate at enim. Suspendisse.',
-			'2019-10-01'
+			'2019-01-01'
 		);
 	}
 }
@@ -21,30 +33,98 @@ function btnAddTask_OnClick(){
 	const taskDescription = tbTaskDescription.value;
 	const taskDueDate = tbDueDate.value;
 
+	if( !_.isString(taskTitle) 		 || _.isEmpty(taskTitle) 	   ||
+		!_.isString(taskDescription) || _.isEmpty(taskDescription) ||
+		!_.isString(taskDueDate) 	 || _.isEmpty(taskDueDate)){
+
+		alert('Make sure that the task you are trying to add has the contents filled in!');
+		return;
+	}
+
+	if(doesTaskExist(taskTitle)){
+		alert(`A task with the name '${title}' already exists, please choose another!`);
+	}
+
 	addTask(taskTitle, taskDescription, taskDueDate);
 }
 
 function btnClearTasks_OnClick(){
-	while(existingTasks.firstChild != null)
-		existingTasks.removeChild(existingTasks.firstChild);
+	removeAllTasks();	
 }
 
-function addTask(title, description, dueDate){
-	if( !_.isString(title) 		 || _.isEmpty(title) 	  ||
-		!_.isString(description) || _.isEmpty(description) ||
-		!_.isString(dueDate) 	 || _.isEmpty(dueDate)){
+function btnExportTasks_OnClick(){
+	const allTasks = [];
 
-		alert('Make sure that the task you are trying to add has the contents filled in!');
-	    return;
+	for(let i = 0; i < getNumberOfTasks(); i++){
+		const taskElement = getTaskElementAtIndex(i);
+
+		// @Workaround
+		// For some reason we are getting an undefined element. We should not be. This 
+		// is a workaround.
+		if(_.isNull(taskElement) || _.isUndefined(taskElement))
+			continue;
+
+		const taskTitle = taskElement.childNodes[0].innerText;
+
+		// @Optimisation
+		// If the refactor at the top of this file is implemented, then we
+		// would not need this replace call.
+		const taskDueDate = taskElement.childNodes[1].innerText.replace("Due Date: ", "");
+		const taskDescription = taskElement.childNodes[2].innerText;
+
+		allTasks.push({
+			taskTitle,
+			taskDueDate,
+			taskDescription
+		});
 	}
 
-	if(doesTaskExist(title)){
-		alert('A task with that name already exists, please choose another!');
+	console.log("Your exported JSON is below!");
+	console.log(JSON.stringify(allTasks));
+
+	// @TODO
+	// Allow the user to download this as json. How? I have no idea.
+}
+
+function btnImportTasks_OnClick(){
+	const tasks = prompt("Please paste your task JSON!", "");
+
+	if(_.isNull(tasks) || _.isUndefined(tasks) || _.isEmpty(tasks)){
+		alert("Please input your JSON!");
 		return;
 	}
 
+	const allTasks = JSON.parse(tasks);
+
+	if(!_.isArray(allTasks)){
+		alert("Your JSON is incorrect or malformed! \nAborting!");
+		return;
+	}
+
+	const willReplaceExistingTasks = confirm("Would you like to delete existing tasks?");
+
+	if(willReplaceExistingTasks)
+		removeAllTasks();
+
+	// We loop backwards here so that the order is preserved when exporting and
+	// re-importing data.
+	for(let i = allTasks.length - 1; i >= 0; i--){
+		if(doesTaskExist(allTasks[i].taskTitle)){
+			alert(`A task with the name '${allTasks[i].taskTitle}' already exists, please choose another!`);
+			continue;
+		}
+
+		addTask(
+			allTasks[i].taskTitle, 
+			allTasks[i].taskDescription, 
+			allTasks[i].taskDueDate
+		);
+	}
+}
+
+function addTask(title, description, dueDate){
 	/*
-		Create a HTML element with this layout
+		Create a HTML element with this layout!
 
 		<div>
 			<h3 class="padded-text">Example Task Title</h3>
@@ -60,6 +140,9 @@ function addTask(title, description, dueDate){
 		</div>
 	*/
 
+	// @Readability @Maintainability
+	// This could be cleaned up a fair amount if I use JQuery.
+	// Probably will not install it though as that defeats the purpose of this Javascript module.
 	const outerDiv = document.createElement("div");
 	outerDiv.id = title.toLowerCase();
 
@@ -110,6 +193,12 @@ function addTask(title, description, dueDate){
 	existingTasks.prepend(outerDiv);
 }
 
+// We use toLowerCase on all checks for a task so that 2 tasks cannot be added 
+// with the same name.We do this because the title name is what we use to 
+// reference each task.
+
+// Could/should reference them using another method as wanting to 
+// have 2 tasks named the same is a valid use case.
 function doesTaskExist(title){
 	// @Optimisation
 	// I do not need this temp variable here it is just for clarity
@@ -117,26 +206,48 @@ function doesTaskExist(title){
 	return element != null;
 }
 
-function getTaskElement(title){
+function canAddTask(title){
+	return !doesTaskExist(title);
+}
+
+function getNumberOfTasks(){
+	return existingTasks.childNodes.length;
+}
+
+function getTaskElementAtTitle(title){
 	if(!doesTaskExist(title))
 		return null;
 
 	return document.getElementById(title.toLowerCase());
 }
 
+function getTaskElementAtIndex(index){
+	// @Optimisation
+	// Duplicated check, refactor so we do not check for this multiple times
+	if(existingTasks.childElementCount <= index)
+		return;
+
+	return existingTasks.childNodes[index];
+}
+
 function completeTaskAtTitle(title){
-	console.log('Completing task: ' + title);
+	// @TODO
+	// This should send the task to another page or column showing all 
+	// completed tasks.
+	console.log(`Completing task: ${title}`);
 }
 
 function completeTaskAtIndex(index){
-	console.log('Completing task at index: ' + index);
+	// @TODO
+	// See above
+	console.log(`Completing task at index: ${index}`);
 }
 
 function removeTaskAtTitle(title){
 	if(!doesTaskExist(title))
 		return;
 
-	const taskElement = getTaskElement(title);
+	const taskElement = getTaskElementAtTitle(title);
 	existingTasks.removeChild(taskElement);
 }
 
@@ -144,6 +255,10 @@ function removeTaskAtIndex(index){
 	if(existingTasks.childElementCount <= index)
 		return;
 
-	const taskElement = existingTasks.childNodes[index];
-	existingTasks.removeChild(taskElement);
+	existingTasks.removeChild(getTaskElementAtIndex(index));
+}
+
+function removeAllTasks(){
+	while(existingTasks.firstChild != null)
+		existingTasks.removeChild(existingTasks.firstChild);
 }
