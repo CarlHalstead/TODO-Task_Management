@@ -8,26 +8,28 @@
 	<link href="css/main.css" rel="stylesheet" />
 </head>
 <body onload="body_OnLoad()">
+	<div id="particles-js"></div>
+
 	<form id="form1" runat="server">
 		<div class="col-md-6 scrollable-column">
 			<div class="center-horizontally">
 				<div id="addTaskHeader">
-					<h1 class="padded-title">Add Task</h1>
+					<h1 class="padded-title white-text">Add Task</h1>
 					<hr />
 				</div>
 				
 				<div>
-					<h4>Task Title:</h4>
+					<h4 class="white-text">Task Title:</h4>
 					<input id="tbTaskTitle" class="textbox-width" type="plain">
 				</div>
 
 				<div>
-					<h4>Task Description:</h4>
+					<h4 class="white-text">Task Description:</h4>
 					<textarea id="tbTaskDescription" class="textbox-width" type="plain"></textarea>
 				</div>
 
 				<div>
-					<h4>Task Due Date:</h4>
+					<h4 class="white-text">Task Due Date:</h4>
 					<input id="tbDueDate" class="textbox-width" type="Date">
 				</div>
 
@@ -40,7 +42,7 @@
 		<div class="col-md-6 scrollable-column">
 			<div class="center-horizontally">
 				<div id="currentTasksHeader">
-					<h1 class="padded-title">Current Tasks</h1>
+					<h1 class="padded-title white-text">Current Tasks</h1>
 					<hr />
 				</div>
 
@@ -60,5 +62,7 @@
 
 	<script src="js/lodash.js"></script>
 	<script src="js/todo.js"></script>
+	<script src="js/particles.min.js"></script>
+    <script src="js/particles.js"></script>
 </body>
 </html>

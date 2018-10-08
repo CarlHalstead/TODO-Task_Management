@@ -135,9 +135,9 @@ function addTask(title, description, dueDate){
 		Create a HTML element with this layout!
 
 		<div>
-			<h3 class="padded-text">Example Task Title</h3>
-			<h4 class="padded-text">Due Date: 2018-10-3</h4>
-			<p class="padded-text">Example Task Description - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus justo lacus, pretium sit amet volutpat quis, vulputate at enim. Suspendisse.</p>
+			<h3 class="padded-text white-text">Example Task Title</h3>
+			<h4 class="padded-text white-text">Due Date: 2018-10-3</h4>
+			<p class="padded-text white-text">Example Task Description - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus justo lacus, pretium sit amet volutpat quis, vulputate at enim. Suspendisse.</p>
 			
 			<br />
 
@@ -156,14 +156,17 @@ function addTask(title, description, dueDate){
 
 	const titleElement = document.createElement("h3");
 	titleElement.classList.add("padded-text");
+	titleElement.classList.add("white-text");
 	titleElement.innerText = title;
 
 	const dueElement = document.createElement("h4");
 	dueElement.classList.add("padded-text");
+	dueElement.classList.add("white-text");
 	dueElement.innerText = `Due Date: ${dueDate}`;
 
 	const descriptionElement = document.createElement("p");
 	descriptionElement.classList.add("padded-text");
+	descriptionElement.classList.add("white-text");
 	descriptionElement.innerText = description;
 
 	const breakElement = document.createElement("br");
@@ -278,6 +281,12 @@ function setCookie(key, value){
 function getCookie(key){
 	if(_.isEmpty(document.cookie))
 		return "";
+
+	/*
+		Cookies follow this pattern:
+
+		cookieName=cookieValue; anotherCookieName=anotherCookieValue	
+	 */
 
 	const cookies = document.cookie.split(';');
 
