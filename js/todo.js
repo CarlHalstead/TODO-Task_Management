@@ -14,6 +14,11 @@
  */
 
 function body_OnLoad(){
+	if(doesCookieExist("savedTasks")){
+		importTasks(getCookie("savedTasks"));
+		return; 
+	}
+
 	const NUM_OF_EXAMPLES = 10;
 
 	for(let i = NUM_OF_EXAMPLES; i > 0; i--){
@@ -79,6 +84,8 @@ function btnExportTasks_OnClick(){
 	console.log("Your exported JSON is below!");
 	console.log(JSON.stringify(allTasks));
 
+	setCookie("savedTasks", JSON.stringify(allTasks));
+
 	// @TODO
 	// Allow the user to download this as json. How? I have no idea.
 }
@@ -91,17 +98,21 @@ function btnImportTasks_OnClick(){
 		return;
 	}
 
-	const allTasks = JSON.parse(tasks);
-
-	if(!_.isArray(allTasks)){
-		alert("Your JSON is incorrect or malformed! \nAborting!");
-		return;
-	}
-
 	const willReplaceExistingTasks = confirm("Would you like to delete existing tasks?");
 
 	if(willReplaceExistingTasks)
 		removeAllTasks();
+
+	importJson(tasks);
+}
+
+function importTasks(json){
+	const allTasks = JSON.parse(json);
+
+	if(!_.isArray(allTasks)){
+		alert("Your JSON is incorrect or malformed! \nAborting the import process!");
+		return;
+	}
 
 	// We loop backwards here so that the order is preserved when exporting and
 	// re-importing data.
@@ -258,4 +269,28 @@ function removeTaskAtIndex(index){
 function removeAllTasks(){
 	while(existingTasks.firstChild != null)
 		existingTasks.removeChild(existingTasks.firstChild);
+}
+
+function setCookie(key, value){
+	document.cookie = `${key}=${value}`;
+}
+
+function getCookie(key){
+	if(_.isEmpty(document.cookie))
+		return "";
+
+	const cookies = document.cookie.split(';');
+
+	for(let i = 0; i < cookies.length; i++){
+		const cookie = cookies[i].split('=');
+		const cookieKey = cookie[0];
+		const cookieValue = cookie[1];
+
+		if(cookieKey === key)
+			return cookieValue;
+	}
+}
+
+function doesCookieExist(key){
+	return !_.isEmpty(getCookie(key));
 }
