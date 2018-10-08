@@ -38,6 +38,12 @@ hr {
 	width: 25vw;
 }
 
+.btn-big {
+	width: 170px;
+	height: 60px;
+	font-size: 18px;
+}
+
 #particles-js {
 	position: absolute;
 	width: 100%;
