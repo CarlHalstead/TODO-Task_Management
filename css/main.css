@@ -1,6 +1,15 @@
-﻿body, html{
+﻿/*
+ 	@TODO
+  	Add some padding to the buttons for the tasks.
+ */
+
+body, html{
     height: 100vh;
     overflow:hidden;
+}
+
+.h1-big{
+	font-size: 60px;
 }
 
 .center-horizontally{

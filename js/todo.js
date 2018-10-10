@@ -61,8 +61,8 @@ function btnExportTasks_OnClick(){
 		const taskElement = getTaskElementAtIndex(i);
 
 		// @Workaround
-		// For some reason we are getting an undefined element. We should not be. This 
-		// is a workaround.
+		// For some reason we are getting an undefined element. We should not be. 
+		// This is a workaround.
 		if(_.isNull(taskElement) || _.isUndefined(taskElement))
 			continue;
 
@@ -70,7 +70,7 @@ function btnExportTasks_OnClick(){
 
 		// @Optimisation
 		// If the refactor at the top of this file is implemented, then we
-		// would not need this replace call.
+		// would not need this replace call. Or in fact, this loop at all!
 		const taskDueDate = taskElement.childNodes[1].innerText.replace("Due Date: ", "");
 		const taskDescription = taskElement.childNodes[2].innerText;
 
@@ -81,13 +81,16 @@ function btnExportTasks_OnClick(){
 		});
 	}
 
-	console.log("Your exported JSON is below!");
-	console.log(JSON.stringify(allTasks));
+	const json = JSON.stringify(allTasks);
 
-	setCookie("savedTasks", JSON.stringify(allTasks));
+	console.log("Your exported JSON is below!");
+	console.log(json);
+
+	setCookie("savedTasks", json);
 
 	// @TODO
 	// Allow the user to download this as json. How? I have no idea.
+	// If this were ASP.NET I could figure it out but not pure JS.
 }
 
 function btnImportTasks_OnClick(){
@@ -104,6 +107,15 @@ function btnImportTasks_OnClick(){
 		removeAllTasks();
 
 	importJson(tasks);
+}
+
+function btnDeleteSavedTasks_OnClick(){
+	alert("Currently being developed!");
+	return;
+
+	// @TODO
+	// Needs testing before being allowed to run
+	deleteCookie("savedTasks");
 }
 
 function importTasks(json){
@@ -298,6 +310,13 @@ function getCookie(key){
 		if(cookieKey === key)
 			return cookieValue;
 	}
+}
+
+// @TODO
+// Currently not working (Or at least seemingly not working)
+// Perhaps the page needs to be refreshed in order for the cookie to be deleted
+function deleteCookie(key){
+	document.cookie = `${key}=; Path=/; expires=Thur, 01 Jan 1970 00:00:01 GMT`;
 }
 
 function doesCookieExist(key){
