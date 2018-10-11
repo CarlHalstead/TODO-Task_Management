@@ -10,12 +10,14 @@
 <body onload="body_OnLoad()">
 	<div id="particles-js"></div>
 
-	<div class="col-md-6 scrollable-column">
+	<div class="col-md-4 scrollable-column">
 		<div class="center-horizontally">
 			<div id="addTaskHeader">
 				<h1 class="padded-title white-text">Add Task</h1>
 				<hr />
 			</div>
+
+			<div></div>
 			
 			<div>
 				<h4 class="white-text">Task Title:</h4>
@@ -38,14 +40,14 @@
 		</div>
 	</div>
 
-	<div class="col-md-6 scrollable-column">
+	<div class="col-md-4 scrollable-column">
 		<div class="center-horizontally">
 			<div id="currentTasksHeader">
 				<h1 class="padded-title white-text">Current Tasks</h1>
 				<hr />
 			</div>
 
-			<button id="btnExportTasks" class="btn btn-success" type="button" onclick="btnExportTasks_OnClick()">Export Tasks</button>
+			<button id="btnExportTasks" class="btn btn-success" type="button" onclick="btnExportTasks_OnClick()">Save Tasks</button>
 			<button id="btnImportTasks" class="btn btn-success" type="button" onclick="btnImportTasks_OnClick()">Import Tasks</button>
 			<button id="btnClearTasks" class="btn btn-danger" type="button" onclick="btnClearTasks_OnClick()">Clear ALL Tasks</button>
 			<button id="btnDeleteSavedTasks" class="btn btn-danger" type="button" onclick="btnDeleteSavedTasks_OnClick()">Delete Saved Tasks</button>
@@ -59,9 +61,28 @@
 		</div>
 	</div>
 
-	<script src="js/lodash.js"></script>
+	<div class="col-md-4 scrollable-column">
+		<div class="center-horizontally">
+			<div id="completedTasksHeader">
+				<h1 class="padded-title white-text">Completed Tasks</h1>
+				<hr />
+			</div>
+
+			<button id="btnClearCompletedTasks" class="btn btn-danger" type="button" onclick="btnDeleteCompletedTasks_OnClick()">Delete Completed Tasks</button>
+
+			<br>
+
+			<hr>
+
+			<div id="completedTasks">
+			</div>
+		</div>
+	</div>
+
+	<script src="js/lodash.min.js"></script>
 	<script src="js/particles.min.js"></script>
     <script src="js/particles.js"></script>
 	<script src="js/todo.js"></script>
+    <script src="js/utilities.js"></script>
 </body>
 </html>

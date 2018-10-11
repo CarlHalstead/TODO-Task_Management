@@ -8,6 +8,16 @@ body, html{
     overflow:hidden;
 }
 
+/*
+	Style the horizontal ruler according to the defaults on the W3Schools site as hr officially
+	is no longer used as a visual element with HTML5 so we should supply custom CSS.
+*/
+hr {
+	display: block;
+	border-style: inset;
+	border-width: 1px;
+}
+
 .h1-big{
 	font-size: 60px;
 }
@@ -21,17 +31,7 @@ body, html{
 }
 
 .padded-text{
-    margin: 20px 100px 0 100px;
-}
-
-/*
-	Style the horizontal ruler according to the defaults on the W3Schools site as hr officially
-	is no longer used as a visual element with HTML5 so we should supply custom CSS.
-*/
-hr {
-	display: block;
-	border-style: inset;
-	border-width: 1px;
+    margin: 20px 70px 0 70px;
 }
 
 .white-text{

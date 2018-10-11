@@ -5,29 +5,73 @@
  */
 
 /*
+	@Improvement
+	When a new task is added or an existing one is deleted or completed,
+	save the tasks. This is instead of the user having to press 'Export Tasks',
+	whenever they need to save. Pretty simple.
+
 	@Refactor
-	Currently, our data is stored in our HTML. I think this is a bad way of
-	doing it. When we add a task, it should be added to an array first
-	before adding the new task to the webpage. As opposed to what we are doing 
-	now, which is store this information in the page and extract it when we want
-	to export this information.
+	We have some obsolete code here as well as some naming which could be improved.
+	This can be done over time when all or most features have been implemented.
+
+	@Bug
+	Date for completed tasks always comes out as undefined.
  */
 
-function body_OnLoad(){
-	if(doesCookieExist("savedTasks")){
-		importTasks(getCookie("savedTasks"));
-		return; 
-	}
+const ACTIVE_TASKS_COOKIE_NAME 	  = "active-tasks";
+const COMPLETED_TASKS_COOKIE_NAME = "completed-tasks";
 
-	const NUM_OF_EXAMPLES = 10;
+let currentlyActiveTasks 	= [];
+let currentlyCompletedTasks = [];
 
-	for(let i = NUM_OF_EXAMPLES; i > 0; i--){
-		addTask(
-			`Example Task ${i}`, 
-			'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus justo lacus, pretium sit amet volutpat quis, vulputate at enim. Suspendisse.',
-			'2019-01-01'
+function getCurrentDate(){
+	return new Date().toLocaleDateString();
+}
+
+function loadAndDisplayTasks(){
+	loadTasks();
+	displayTasks();
+}
+
+function loadTasks(){
+	currentlyActiveTasks = JSON.parse(getCookie(ACTIVE_TASKS_COOKIE_NAME));
+	currentlyCompletedTasks = JSON.parse(getCookie(COMPLETED_TASKS_COOKIE_NAME));
+}
+
+function redrawTasks(){
+	removeAllChildren(existingTasks);
+	removeAllChildren(completedTasks);
+
+	displayTasks();
+}
+
+function displayTasks(){
+	currentlyActiveTasks.forEach((element, index) => {
+		displayNewActiveTask(
+			element.taskTitle, 
+			element.taskDescription, 
+			element.taskDueDate
 		);
+	});
+
+	currentlyCompletedTasks.forEach((element, index) => {
+		displayNewCompletedTask(
+			element.taskTitle, 
+			element.taskDescription, 
+			element.taskDueDate
+		);
+	});
+}
+
+function body_OnLoad(){
+	if(doesCookieExist(ACTIVE_TASKS_COOKIE_NAME)){
+		if(doesCookieExist(COMPLETED_TASKS_COOKIE_NAME)){
+			loadAndDisplayTasks();
+			return;
+		}
 	}
+
+	createExampleTasks(10);
 }
 
 function btnAddTask_OnClick(){
@@ -47,47 +91,23 @@ function btnAddTask_OnClick(){
 		alert(`A task with the name '${title}' already exists, please choose another!`);
 	}
 
-	addTask(taskTitle, taskDescription, taskDueDate);
+	addActiveTask(taskTitle, taskDescription, taskDueDate);
+
+	
 }
 
 function btnClearTasks_OnClick(){
-	removeAllTasks();	
+	removeAllTasks();
+}
+
+function btnDeleteCompletedTasks_OnClick(){
+	removeAllCompletedTasks();
 }
 
 function btnExportTasks_OnClick(){
-	const allTasks = [];
-
-	for(let i = 0; i < getNumberOfTasks(); i++){
-		const taskElement = getTaskElementAtIndex(i);
-
-		// @Workaround
-		// For some reason we are getting an undefined element. We should not be. 
-		// This is a workaround.
-		if(_.isNull(taskElement) || _.isUndefined(taskElement))
-			continue;
-
-		const taskTitle = taskElement.childNodes[0].innerText;
-
-		// @Optimisation
-		// If the refactor at the top of this file is implemented, then we
-		// would not need this replace call. Or in fact, this loop at all!
-		const taskDueDate = taskElement.childNodes[1].innerText.replace("Due Date: ", "");
-		const taskDescription = taskElement.childNodes[2].innerText;
-
-		allTasks.push({
-			taskTitle,
-			taskDueDate,
-			taskDescription
-		});
-	}
-
-	const json = JSON.stringify(allTasks);
-
-	console.log("Your exported JSON is below!");
-	console.log(json);
-
-	setCookie("savedTasks", json);
-
+	setCookie(ACTIVE_TASKS_COOKIE_NAME, JSON.stringify(currentlyActiveTasks));
+	setCookie(COMPLETED_TASKS_COOKIE_NAME, JSON.stringify(currentlyCompletedTasks));
+	
 	// @TODO
 	// Allow the user to download this as json. How? I have no idea.
 	// If this were ASP.NET I could figure it out but not pure JS.
@@ -134,7 +154,7 @@ function importTasks(json){
 			continue;
 		}
 
-		addTask(
+		addActiveTask(
 			allTasks[i].taskTitle, 
 			allTasks[i].taskDescription, 
 			allTasks[i].taskDueDate
@@ -142,7 +162,17 @@ function importTasks(json){
 	}
 }
 
-function addTask(title, description, dueDate){
+function addActiveTask(taskTitle, taskDescription, taskDueDate){
+	currentlyActiveTasks.push({
+		taskTitle, 
+		taskDescription, 
+		taskDueDate
+	});
+
+	displayNewActiveTask(taskTitle, taskDescription, taskDueDate);
+}
+
+function displayNewActiveTask(title, description, dueDate){
 	/*
 		Create a HTML element with this layout!
 
@@ -216,6 +246,75 @@ function addTask(title, description, dueDate){
 	existingTasks.prepend(outerDiv);
 }
 
+function addCompletedTask(taskTitle, taskDescription, taskCompletedDate){
+	currentlyCompletedTasks.push({
+		taskTitle, 
+		taskDescription, 
+		taskCompletedDate
+	});
+
+	displayNewCompletedTask(taskTitle, taskDescription, taskCompletedDate);
+}
+
+function displayNewCompletedTask(title, description, completedDate){
+	/*
+		Create a HTML element with this layout!
+
+		<div>
+			<h3 class="padded-text white-text">The tasks title</h3>
+			<h4 class="padded-text white-text">Completed: NOW</h4>
+			<p class="padded-text white-text">The tasks description</p>
+			
+			<br />
+
+			<button id="btnDeleteTask" class="btn btn-danger" type="button">Delete Task</button>
+
+			<hr />
+		</div>
+	*/
+
+	const outerDiv = document.createElement("div");
+	outerDiv.id = title.toLowerCase();
+
+	const titleElement = document.createElement("h3");
+	titleElement.classList.add("padded-text");
+	titleElement.classList.add("white-text");
+	titleElement.innerText = title;
+
+	const dueElement = document.createElement("h4");
+	dueElement.classList.add("padded-text");
+	dueElement.classList.add("white-text");
+	dueElement.innerText = `Completed: ${completedDate}`;
+
+	const descriptionElement = document.createElement("p");
+	descriptionElement.classList.add("padded-text");
+	descriptionElement.classList.add("white-text");
+	descriptionElement.innerText = description;
+
+	const breakElement = document.createElement("br");
+
+	const btnDeleteTask = document.createElement("button");
+	btnDeleteTask.classList.add("btn");
+	btnDeleteTask.classList.add("btn-danger");
+	btnDeleteTask.innerText = "Delete Task";
+	btnDeleteTask.type = "button";
+
+	btnDeleteTask.addEventListener('click', function(){
+		removeCompletedTaskAtTitle(title);
+	});
+
+	const horizontalRuler = document.createElement("hr");
+
+	outerDiv.appendChild(titleElement);
+	outerDiv.appendChild(dueElement);
+	outerDiv.appendChild(descriptionElement);
+	outerDiv.appendChild(breakElement);
+	outerDiv.appendChild(btnDeleteTask);
+	outerDiv.appendChild(horizontalRuler);
+
+	completedTasks.prepend(outerDiv);
+}
+
 // We use toLowerCase on all checks for a task so that 2 tasks cannot be added 
 // with the same name.We do this because the title name is what we use to 
 // reference each task.
@@ -237,6 +336,12 @@ function getNumberOfTasks(){
 	return existingTasks.childNodes.length;
 }
 
+function getCurrentlyActiveTaskByTitle(title){
+	return _.find(currentlyActiveTasks, (element) => {
+		return element.taskTitle == title;
+	});
+}
+
 function getTaskElementAtTitle(title){
 	if(!doesTaskExist(title))
 		return null;
@@ -254,40 +359,39 @@ function getTaskElementAtIndex(index){
 }
 
 function completeTaskAtTitle(title){
-	// @TODO
-	// This should send the task to another page or column showing all 
-	// completed tasks.
-	console.log(`Completing task: ${title}`);
+	const task = getCurrentlyActiveTaskByTitle(title);
+
+	removeTaskAtTitle(title);
+	addCompletedTask(task.taskTitle, task.taskDescription, getCurrentDate());
 }
 
-function completeTaskAtIndex(index){
-	// @TODO
-	// See above
-	console.log(`Completing task at index: ${index}`);
-}
 
 function removeTaskAtTitle(title){
-	if(!doesTaskExist(title))
-		return;
+	_.remove(currentlyActiveTasks, (element) => {
+		return element.taskTitle == title;
+	});
 
-	const taskElement = getTaskElementAtTitle(title);
-	existingTasks.removeChild(taskElement);
+	redrawTasks();
 }
 
-function removeTaskAtIndex(index){
-	if(existingTasks.childElementCount <= index)
-		return;
+function removeCompletedTaskAtTitle(title){
+	_.remove(currentlyCompletedTasks, (element) => {
+		return element.taskTitle == title;
+	});
 
-	existingTasks.removeChild(getTaskElementAtIndex(index));
+	redrawTasks();
 }
 
 function removeAllTasks(){
-	while(existingTasks.firstChild != null)
-		existingTasks.removeChild(existingTasks.firstChild);
+	removeAllChildren(existingTasks);
+}
+
+function removeAllCompletedTasks(){
+	removeAllChildren(completedTasks);
 }
 
 function setCookie(key, value){
-	document.cookie = `${key}=${value}`;
+	document.cookie = `${key}=${value}; Path=/;`;
 }
 
 function getCookie(key){
@@ -304,10 +408,10 @@ function getCookie(key){
 
 	for(let i = 0; i < cookies.length; i++){
 		const cookie = cookies[i].split('=');
-		const cookieKey = cookie[0];
+		const cookieKey = _.trim(cookie[0]);
 		const cookieValue = cookie[1];
 
-		if(cookieKey === key)
+		if(cookieKey == key)
 			return cookieValue;
 	}
 }
@@ -321,4 +425,21 @@ function deleteCookie(key){
 
 function doesCookieExist(key){
 	return !_.isEmpty(getCookie(key));
+}
+
+function createExampleTasks(amount){
+	if(!_.isNumber(amount))
+		return;
+
+	for(let i = amount; i > 0; i--){
+		const taskTitle = `Example Task ${i}`;
+		const taskDescription = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus justo lacus, pretium sit amet volutpat quis, vulputate at enim. Suspendisse.';
+		const taskDueDate = '2019-01-01';
+
+		addActiveTask(
+			taskTitle,
+			taskDescription,
+			taskDueDate
+		);
+	}
 }
