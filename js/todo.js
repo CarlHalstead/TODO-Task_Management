@@ -130,12 +130,8 @@ function btnImportTasks_OnClick(){
 }
 
 function btnDeleteSavedTasks_OnClick(){
-	alert("Currently being developed!");
-	return;
-
-	// @TODO
-	// Needs testing before being allowed to run
-	deleteCookie("savedTasks");
+	deleteCookie(ACTIVE_TASKS_COOKIE_NAME);
+	deleteCookie(COMPLETED_TASKS_COOKIE_NAME);
 }
 
 function importTasks(json){
@@ -416,11 +412,8 @@ function getCookie(key){
 	}
 }
 
-// @TODO
-// Currently not working (Or at least seemingly not working)
-// Perhaps the page needs to be refreshed in order for the cookie to be deleted
 function deleteCookie(key){
-	document.cookie = `${key}=; Path=/; expires=Thur, 01 Jan 1970 00:00:01 GMT`;
+	document.cookie = `${key}=; Path=/; expires=Thur, 01 Jan 1970 00:00:00 GMT`;
 }
 
 function doesCookieExist(key){
