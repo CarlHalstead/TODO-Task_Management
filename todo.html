@@ -21,17 +21,17 @@
 			
 			<div>
 				<h4 class="white-text">Task Title:</h4>
-				<input id="tbTaskTitle" class="textbox-width" type="plain">
+				<input id="tbTaskTitle" class="tb-width" type="plain">
 			</div>
 
 			<div>
 				<h4 class="white-text">Task Description:</h4>
-				<textarea id="tbTaskDescription" class="textbox-width" type="plain"></textarea>
+				<textarea id="tbTaskDescription" class="tb-width tb-multiline" type="plain"></textarea>
 			</div>
 
 			<div>
 				<h4 class="white-text">Task Due Date:</h4>
-				<input id="tbDueDate" class="textbox-width" type="Date">
+				<input id="tbDueDate" class="tb-width" type="Date">
 			</div>
 
 			<br />
@@ -47,10 +47,14 @@
 				<hr />
 			</div>
 
-			<button id="btnExportTasks" class="btn btn-success" type="button" onclick="btnExportTasks_OnClick()">Save Tasks</button>
-			<button id="btnImportTasks" class="btn btn-success" type="button" onclick="btnImportTasks_OnClick()">Import Tasks</button>
-			<button id="btnClearTasks" class="btn btn-danger" type="button" onclick="btnClearTasks_OnClick()">Clear ALL Tasks</button>
-			<button id="btnDeleteSavedTasks" class="btn btn-danger" type="button" onclick="btnDeleteSavedTasks_OnClick()">Delete Saved Tasks</button>
+			<button id="btnExportTasks" class="btn btn-success btn-padding" type="button" onclick="btnExportTasks_OnClick()">Save Tasks</button>
+			<button id="btnImportTasks" class="btn btn-success btn-padding" type="button" onclick="btnImportTasks_OnClick()">Import Tasks</button>
+
+			<br />
+			<br />
+
+			<button id="btnClearTasks" class="btn btn-danger btn-padding" type="button" onclick="btnClearTasks_OnClick()">Clear ALL Tasks</button>
+			<button id="btnDeleteSavedTasks" class="btn btn-danger btn-padding" type="button" onclick="btnDeleteSavedTasks_OnClick()">Delete Saved Tasks</button>
 
 			<br />
 

@@ -1,9 +1,4 @@
-﻿/*
- 	@TODO
-  	Add some padding to the buttons for the tasks.
- */
-
-body, html{
+﻿body, html{
     height: 100vh;
     overflow:hidden;
 }
@@ -12,7 +7,7 @@ body, html{
 	Style the horizontal ruler according to the defaults on the W3Schools site as hr officially
 	is no longer used as a visual element with HTML5 so we should supply custom CSS.
 */
-hr {
+hr{
 	display: block;
 	border-style: inset;
 	border-width: 1px;
@@ -26,7 +21,11 @@ hr {
     text-align: center;
 }
 
-.center-vertically {
+.btn-padding{
+	margin-right: 5px;
+}
+
+.center-vertically{
 	padding-top: 40vh;
 }
 
@@ -43,17 +42,22 @@ hr {
 	overflow-y: scroll;
 }
 
-.textbox-width{
+.tb-width{
 	width: 25vw;
 }
 
-.btn-big {
+.tb-multiline{
+	max-width: 95%;
+	min-height: 80px;
+}
+
+.btn-big{
 	width: 170px;
 	height: 60px;
 	font-size: 18px;
 }
 
-#particles-js {
+#particles-js{
 	position: absolute;
 	width: 100%;
 	height: 100%;
