@@ -1,10 +1,9 @@
 /*
 	LIBRARIES/FRAMEWORKS USED:
-		* Bootstrap (https://getbootstrap.com/docs/3.3/)
+		* Bootstrap 3 (https://getbootstrap.com/docs/3.3/)
 		* Lodash 	(https://lodash.com)
- */
+		* JQuery	(https://jquery.com/)
 
-/*
 	@Improvement
 	*	When a new task is added or an existing one is deleted or completed,
 		save the tasks. This is instead of the user having to press 'Save Tasks',
@@ -17,6 +16,7 @@
 	@TODO
 	*	Allow the user to download their tasks when exporting.
 	* 	Where possible, change all for loops to forEach for clarity.
+	*	Move cookie methods (setCookie, getCookie) to a module which will be included.
 
 	@Bug
 	*	Date for completed tasks always comes out as undefined.
@@ -27,6 +27,106 @@ const COMPLETED_TASKS_COOKIE_NAME = "completed-tasks";
 
 let currentlyActiveTasks 	= [];
 let currentlyCompletedTasks = [];
+
+function body_OnLoad(){
+	if(doesCookieExist(ACTIVE_TASKS_COOKIE_NAME)){
+		if(doesCookieExist(COMPLETED_TASKS_COOKIE_NAME)){
+			loadAndDisplayTasks();
+			return;
+		}
+	}
+
+	createExampleTasks(20);
+}
+
+function btnAddTask_OnClick(){
+	const taskTitle = tbTaskTitle.value;
+	const taskDescription = tbTaskDescription.value;
+	const taskDueDate = tbDueDate.value;
+
+	if( !_.isString(taskTitle) 		 || _.isEmpty(taskTitle) 	   ||
+		!_.isString(taskDescription) || _.isEmpty(taskDescription) ||
+		!_.isString(taskDueDate) 	 || _.isEmpty(taskDueDate)){
+
+		alert('Make sure that the task you are trying to add has the contents filled in!');
+		return;
+	}
+
+	if(doesTaskExist(taskTitle)){
+		alert(`A task with the name '${title}' already exists, please choose another!`);
+	}
+
+	addActiveTask(taskTitle, taskDescription, taskDueDate);
+}
+
+/**
+ * Remove all tasks under the 'Current Tasks' column
+ */
+function btnClearTasks_OnClick(){
+	removeAllTasks();
+}
+
+/**
+ * Remove all tasks under the 'Completed Tasks' column
+ */
+function btnDeleteCompletedTasks_OnClick(){
+	removeAllCompletedTasks();
+}
+
+/**
+ * Stringify the active and completed tasks arrays and save them as a cookie
+ * for the website. We should also add an option for the JSON to be downloaded
+ * so that it wont get wiped after a cookie refresh.
+ */
+function btnExportTasks_OnClick(){
+	setCookie(ACTIVE_TASKS_COOKIE_NAME, JSON.stringify(currentlyActiveTasks));
+	setCookie(COMPLETED_TASKS_COOKIE_NAME, JSON.stringify(currentlyCompletedTasks));
+}
+
+function btnImportTasks_OnClick(){
+	const tasks = prompt("Please paste your task JSON!", "");
+
+	if(_.isEmpty(tasks)){
+		alert("Import cancelled!");
+		return;
+	}
+
+	const willReplaceExistingTasks = confirm("Would you like to delete existing tasks?");
+
+	if(willReplaceExistingTasks)
+		removeAllTasks();
+
+	importTasks(tasks);
+}
+
+function btnDeleteSavedTasks_OnClick(){
+	deleteCookie(ACTIVE_TASKS_COOKIE_NAME);
+	deleteCookie(COMPLETED_TASKS_COOKIE_NAME);
+}
+
+function importTasks(json){
+	const allTasks = JSON.parse(json);
+
+	if(!_.isArray(allTasks)){
+		alert("Your JSON is incorrect or malformed! \nAborting the import process!");
+		return;
+	}
+
+	// We loop backwards here to preserve the order when exporting and
+	// re-importing data.
+	allTasks.reverse().forEach((element, index) => {
+		if(doesTaskExist(element.taskTitle)){
+			alert(`A task with the name '${element.taskTitle}' already exists, please choose another!`);
+			return;
+		}
+
+		addActiveTask(
+			element.taskTitle, 
+			element.taskDescription, 
+			element.taskDueDate
+		);
+	});
+}
 
 /**
  * Get the current date formatted locally. e.g. In the UK we use DD/MM/YYYY,
@@ -97,106 +197,6 @@ function displayTasks(){
 	});
 }
 
-function body_OnLoad(){
-	if(doesCookieExist(ACTIVE_TASKS_COOKIE_NAME)){
-		if(doesCookieExist(COMPLETED_TASKS_COOKIE_NAME)){
-			loadAndDisplayTasks();
-			return;
-		}
-	}
-
-	createExampleTasks(20);
-}
-
-function btnAddTask_OnClick(){
-	const taskTitle = tbTaskTitle.value;
-	const taskDescription = tbTaskDescription.value;
-	const taskDueDate = tbDueDate.value;
-
-	if( !_.isString(taskTitle) 		 || _.isEmpty(taskTitle) 	   ||
-		!_.isString(taskDescription) || _.isEmpty(taskDescription) ||
-		!_.isString(taskDueDate) 	 || _.isEmpty(taskDueDate)){
-
-		alert('Make sure that the task you are trying to add has the contents filled in!');
-		return;
-	}
-
-	if(doesTaskExist(taskTitle)){
-		alert(`A task with the name '${title}' already exists, please choose another!`);
-	}
-
-	addActiveTask(taskTitle, taskDescription, taskDueDate);
-}
-
-/**
- * Remove all tasks under the 'Current Tasks' column
- */
-function btnClearTasks_OnClick(){
-	removeAllTasks();
-}
-
-/**
- * Remove all tasks under the 'Completed Tasks' column
- */
-function btnDeleteCompletedTasks_OnClick(){
-	removeAllCompletedTasks();
-}
-
-/**
- * Stringify the active and completed tasks arrays and save them as a cookie
- * for the website. We should also add an option for the JSON to be downloaded
- * so that it wont get wiped after a cookie refresh.
- */
-function btnExportTasks_OnClick(){
-	setCookie(ACTIVE_TASKS_COOKIE_NAME, JSON.stringify(currentlyActiveTasks));
-	setCookie(COMPLETED_TASKS_COOKIE_NAME, JSON.stringify(currentlyCompletedTasks));
-}
-
-function btnImportTasks_OnClick(){
-	const tasks = prompt("Please paste your task JSON!", "");
-
-	if(_.isNull(tasks) || _.isUndefined(tasks) || _.isEmpty(tasks)){
-		alert("Import cancelled!");
-		return;
-	}
-
-	const willReplaceExistingTasks = confirm("Would you like to delete existing tasks?");
-
-	if(willReplaceExistingTasks)
-		removeAllTasks();
-
-	importTasks(tasks);
-}
-
-function btnDeleteSavedTasks_OnClick(){
-	deleteCookie(ACTIVE_TASKS_COOKIE_NAME);
-	deleteCookie(COMPLETED_TASKS_COOKIE_NAME);
-}
-
-function importTasks(json){
-	const allTasks = JSON.parse(json);
-
-	if(!_.isArray(allTasks)){
-		alert("Your JSON is incorrect or malformed! \nAborting the import process!");
-		return;
-	}
-
-	// We loop backwards here to preserve the order when exporting and
-	// re-importing data.
-	allTasks.reverse().forEach((element, index) => {
-		if(doesTaskExist(element.taskTitle)){
-			alert(`A task with the name '${element.taskTitle}' already exists, please choose another!`);
-			return;
-		}
-
-		addActiveTask(
-			element.taskTitle, 
-			element.taskDescription, 
-			element.taskDueDate
-		);
-	});
-}
-
 function addActiveTask(taskTitle, taskDescription, taskDueDate){
 	currentlyActiveTasks.push({
 		taskTitle, 
@@ -208,86 +208,21 @@ function addActiveTask(taskTitle, taskDescription, taskDueDate){
 }
 
 function displayNewActiveTask(title, description, dueDate){
-	/*
-		Create a HTML element with this layout!
-
-		<div>
-			<h3 class="padded-text white-text">Example Task Title</h3>
-			<h4 class="padded-text white-text">Due Date: 2018-10-3</h4>
-			<p class="padded-text white-text">Example Task Description - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus justo lacus, pretium sit amet volutpat quis, vulputate at enim. Suspendisse.</p>
+	const htmlElement = $.parseHTML(
+		`<div id=${title.toLowerCase()}>
+			<h3 class="padded-text white-text">${title}</h3>
+			<h4 class="padded-text white-text">Due Date: ${dueDate}</h4>
+			<p class="padded-text white-text">${description}</p>
 			
 			<br />
 
-			<button id="btnCompleteTask" class="btn btn-success btn-padding" type="button">Complete Task</button>
-			<button id="btnDeleteTask" class="btn btn-danger btn-padding" type="button">Delete Task</button>
+			<button id="btnCompleteTask" class="btn btn-success btn-padding" type="button" onclick="completeTaskAtTitle('${title}')">Complete Task</button>
+			<button id="btnDeleteTask" class="btn btn-danger btn-padding" type="button" onclick="removeTaskAtTitle('${title}')">Delete Task</button>
 
 			<hr />
-		</div>
-	*/
+		</div>`);
 
-	// @Readability @Maintainability
-	// This could be cleaned up a fair amount if I use JQuery.
-	// Probably will not install it though as that defeats the purpose of this Javascript module.
-	// 
-	// Update:
-	// I will use the latest version of JQuery along with help fromm $.parseHTML
-	// to create my HTML and append it to the column as this is almost as fast
-	// as using document.createElement for a lot cleaner code. It would be 
-	// about 15 lines as opposed to the 53 lines currently.
-	
-	const outerDiv = document.createElement("div");
-	outerDiv.id = title.toLowerCase();
-
-	const titleElement = document.createElement("h3");
-	titleElement.classList.add("padded-text");
-	titleElement.classList.add("white-text");
-	titleElement.innerText = title;
-
-	const dueElement = document.createElement("h4");
-	dueElement.classList.add("padded-text");
-	dueElement.classList.add("white-text");
-	dueElement.innerText = `Due Date: ${dueDate}`;
-
-	const descriptionElement = document.createElement("p");
-	descriptionElement.classList.add("padded-text");
-	descriptionElement.classList.add("white-text");
-	descriptionElement.innerText = description;
-
-	const breakElement = document.createElement("br");
-
-	const btnCompleteTask = document.createElement("button");
-	btnCompleteTask.classList.add("btn");
-	btnCompleteTask.classList.add("btn-success");
-	btnCompleteTask.classList.add("btn-padding");
-	btnCompleteTask.innerText = "Complete Task";
-	btnCompleteTask.type = "button";
-
-	btnCompleteTask.addEventListener('click', function(){
-		completeTaskAtTitle(title);
-	});
-
-	const btnDeleteTask = document.createElement("button");
-	btnDeleteTask.classList.add("btn");
-	btnDeleteTask.classList.add("btn-danger");
-	btnDeleteTask.classList.add("btn-padding");
-	btnDeleteTask.innerText = "Delete Task";
-	btnDeleteTask.type = "button";
-
-	btnDeleteTask.addEventListener('click', function(){
-		removeTaskAtTitle(title);
-	});
-
-	const horizontalRuler = document.createElement("hr");
-
-	outerDiv.appendChild(titleElement);
-	outerDiv.appendChild(dueElement);
-	outerDiv.appendChild(descriptionElement);
-	outerDiv.appendChild(breakElement);
-	outerDiv.appendChild(btnCompleteTask);
-	outerDiv.appendChild(btnDeleteTask);
-	outerDiv.appendChild(horizontalRuler);
-
-	existingTasks.prepend(outerDiv);
+	$("#existingTasks").prepend(htmlElement);
 }
 
 function addCompletedTask(taskTitle, taskDescription, taskCompletedDate){
@@ -301,66 +236,20 @@ function addCompletedTask(taskTitle, taskDescription, taskCompletedDate){
 }
 
 function displayNewCompletedTask(title, description, completedDate){
-	/*
-		Create a HTML element with this layout!
-
-		<div>
-			<h3 class="padded-text white-text">The tasks title</h3>
-			<h4 class="padded-text white-text">Completed: NOW</h4>
-			<p class="padded-text white-text">The tasks description</p>
+	const htmlElement = $.parseHTML(
+		`<div id=${title.toLowerCase()}>
+			<h3 class="padded-text white-text">${title}</h3>
+			<h4 class="padded-text white-text">Due Date: ${completedDate}</h4>
+			<p class="padded-text white-text">${description}</p>
 			
 			<br />
 
-			<button id="btnDeleteTask" class="btn btn-danger" type="button">Delete Task</button>
+			<button id="btnDeleteTask" class="btn btn-danger btn-padding" type="button" onclick="removeCompletedTaskAtTitle('${title}')">Delete Task</button>
 
 			<hr />
-		</div>
-	*/
+		</div>`);
 
-	// @TODO
-	// See comment in displayNewActiveTask for information about the JQuery
-	// update.
-
-	const outerDiv = document.createElement("div");
-	outerDiv.id = title.toLowerCase();
-
-	const titleElement = document.createElement("h3");
-	titleElement.classList.add("padded-text");
-	titleElement.classList.add("white-text");
-	titleElement.innerText = title;
-
-	const dueElement = document.createElement("h4");
-	dueElement.classList.add("padded-text");
-	dueElement.classList.add("white-text");
-	dueElement.innerText = `Completed: ${completedDate}`;
-
-	const descriptionElement = document.createElement("p");
-	descriptionElement.classList.add("padded-text");
-	descriptionElement.classList.add("white-text");
-	descriptionElement.innerText = description;
-
-	const breakElement = document.createElement("br");
-
-	const btnDeleteTask = document.createElement("button");
-	btnDeleteTask.classList.add("btn");
-	btnDeleteTask.classList.add("btn-danger");
-	btnDeleteTask.innerText = "Delete Task";
-	btnDeleteTask.type = "button";
-
-	btnDeleteTask.addEventListener('click', function(){
-		removeCompletedTaskAtTitle(title);
-	});
-
-	const horizontalRuler = document.createElement("hr");
-
-	outerDiv.appendChild(titleElement);
-	outerDiv.appendChild(dueElement);
-	outerDiv.appendChild(descriptionElement);
-	outerDiv.appendChild(breakElement);
-	outerDiv.appendChild(btnDeleteTask);
-	outerDiv.appendChild(horizontalRuler);
-
-	completedTasks.prepend(outerDiv);
+	$("#completedTasks").prepend(htmlElement);
 }
 
 /**
