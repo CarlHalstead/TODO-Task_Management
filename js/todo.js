@@ -209,7 +209,7 @@ function addActiveTask(taskTitle, taskDescription, taskDueDate){
 
 function displayNewActiveTask(title, description, dueDate){
 	const htmlElement = $.parseHTML(
-		`<div id=${title.toLowerCase()}>
+		`<div id="${title.toLowerCase()}">
 			<h3 class="padded-text white-text">${title}</h3>
 			<h4 class="padded-text white-text">Due Date: ${dueDate}</h4>
 			<p class="padded-text white-text">${description}</p>
