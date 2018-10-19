@@ -2,25 +2,33 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>TODO Homepage</title>
+	<title>TODO Homepage</title>
 
-    <link href="css/bootstrap.min.css" rel="stylesheet" />
-    <link href="css/main.css" rel="stylesheet" />
+	<meta http-equiv="Cache-control" content="public">
 </head>
 <body>
-    <div id="particles-js"></div>
+	<div id="particles-js"></div>
 
-    <div class="col-md-12">
-        <div class="center-horizontally center-vertically">
-            <h1 class="h1-big white-text">TODO</h1>
-            <h4 class="white-text">The new task management system for <i>REAL</i> programmers</h4>
+	<div class="col-md-12">
+		<div class="center-horizontally center-vertically">
+			<h1 class="h1-big white-text">TODO</h1>
+			<h4 class="white-text">The new task management system for <i>REAL</i> programmers</h4>
 
-            <button id="btnTodo" class="btn btn-success btn-big" type="button" onclick="redirect('todo.html')">Get Prepared</button>
-        </div>
-    </div>
+			<button id="btnTodo" class="btn btn-success btn-big" type="button" onclick="Utilities.redirect('todo.html')">Get Prepared</button>
+		</div>
+	</div>
 
-    <script src="js/particles.min.js"></script>
-    <script src="js/particles.js"></script>
-    <script src="js/utilities.js"></script>
+	<!-- CSS -->
+	<link href="css/bootstrap.min.css" rel="stylesheet" />
+	<link href="css/main.css" rel="stylesheet" />
+
+	<!-- Frameworks -->
+	<script src="js/particles.min.js"></script>
+
+	<!-- Classes -->
+	<script src="js/Classes/Utilities.js"></script>
+
+	<!-- Scripts -->
+	<script src="js/particles.js"></script>
 </body>
 </html>

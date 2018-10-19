@@ -1,39 +1,49 @@
 /*
 	LIBRARIES/FRAMEWORKS USED:
 		* Bootstrap 3 (https://getbootstrap.com/docs/3.3/)
-		* Lodash 	(https://lodash.com)
-		* JQuery	(https://jquery.com/)
+		* Lodash 	  (https://lodash.com)
+		* JQuery	  (https://jquery.com/)
 
 	@Improvement
 	*	When a new task is added or an existing one is deleted or completed,
 		save the tasks. This is instead of the user having to press 'Save Tasks',
 		whenever they need to save. Pretty simple.
+	*	When a new task is added or an existing one deleted, fade in/out the task perhaps.
 
 	@Refactor
 	*	We have some obsolete code or methods here as well as some naming which could be improved.
 		This can be done over time when all or most features have been implemented.
 
 	@TODO
+	*	Within the task array should be a concrete class, 'Task' instead of an anonymous type
 	*	Allow the user to download their tasks when exporting.
 	* 	Where possible, change all for loops to forEach for clarity.
-	*	Move cookie methods (setCookie, getCookie) to a module which will be included.
 
 	@Bug
 	*	Date for completed tasks always comes out as undefined.
+	*	For some reason attempting to open the site in Edge causes a 'Hmmm...can’t reach this page' issue.
+ 	
+ 	@Obsolete
+ 	* getNumberOfTasks
+ 	* getTaskElementAtIndex
+ 	* getTaskElementAtTitle
+ 	* canAddTask
  */
 
 const ACTIVE_TASKS_COOKIE_NAME 	  = "active-tasks";
 const COMPLETED_TASKS_COOKIE_NAME = "completed-tasks";
 
+const ACTIVE_TASKS_DIV_NAME    = "existing-tasks";
+const COMPLETED_TASKS_DIV_NAME = "completed-tasks";
+
 let currentlyActiveTasks 	= [];
 let currentlyCompletedTasks = [];
 
 function body_OnLoad(){
-	if(doesCookieExist(ACTIVE_TASKS_COOKIE_NAME)){
-		if(doesCookieExist(COMPLETED_TASKS_COOKIE_NAME)){
+	if( Cookies.doesCookieExist(ACTIVE_TASKS_COOKIE_NAME) &&
+		Cookies.doesCookieExist(COMPLETED_TASKS_COOKIE_NAME)){
 			loadAndDisplayTasks();
 			return;
-		}
 	}
 
 	createExampleTasks(20);
@@ -79,8 +89,8 @@ function btnDeleteCompletedTasks_OnClick(){
  * so that it wont get wiped after a cookie refresh.
  */
 function btnExportTasks_OnClick(){
-	setCookie(ACTIVE_TASKS_COOKIE_NAME, JSON.stringify(currentlyActiveTasks));
-	setCookie(COMPLETED_TASKS_COOKIE_NAME, JSON.stringify(currentlyCompletedTasks));
+	Cookies.setCookie(ACTIVE_TASKS_COOKIE_NAME, JSON.stringify(currentlyActiveTasks));
+	Cookies.setCookie(COMPLETED_TASKS_COOKIE_NAME, JSON.stringify(currentlyCompletedTasks));
 }
 
 function btnImportTasks_OnClick(){
@@ -100,8 +110,8 @@ function btnImportTasks_OnClick(){
 }
 
 function btnDeleteSavedTasks_OnClick(){
-	deleteCookie(ACTIVE_TASKS_COOKIE_NAME);
-	deleteCookie(COMPLETED_TASKS_COOKIE_NAME);
+	Cookies.deleteCookie(ACTIVE_TASKS_COOKIE_NAME);
+	Cookies.deleteCookie(COMPLETED_TASKS_COOKIE_NAME);
 }
 
 function importTasks(json){
@@ -162,16 +172,16 @@ function loadAndDisplayTasks(){
  * arrays that we use to keep track of the tasks.
  */
 function loadTasks(){
-	currentlyActiveTasks = JSON.parse(getCookie(ACTIVE_TASKS_COOKIE_NAME));
-	currentlyCompletedTasks = JSON.parse(getCookie(COMPLETED_TASKS_COOKIE_NAME));
+	currentlyActiveTasks = JSON.parse(Cookies.getCookie(ACTIVE_TASKS_COOKIE_NAME));
+	currentlyCompletedTasks = JSON.parse(Cookies.getCookie(COMPLETED_TASKS_COOKIE_NAME));
 }
 
 /**
  * Remove any existing tasks (if there are any) and redraw all of them again.
  */
 function redrawTasks(){
-	removeAllChildren(existingTasks);
-	removeAllChildren(completedTasks);
+	Utilities.removeAllChildren(ACTIVE_TASKS_DIV_NAME);
+	Utilities.removeAllChildren(COMPLETED_TASKS_DIV_NAME);
 
 	displayTasks();
 }
@@ -222,7 +232,7 @@ function displayNewActiveTask(title, description, dueDate){
 			<hr />
 		</div>`);
 
-	$("#existingTasks").prepend(htmlElement);
+	$(`#${ACTIVE_TASKS_DIV_NAME}`).prepend(htmlElement);
 }
 
 function addCompletedTask(taskTitle, taskDescription, taskCompletedDate){
@@ -249,7 +259,7 @@ function displayNewCompletedTask(title, description, completedDate){
 			<hr />
 		</div>`);
 
-	$("#completedTasks").prepend(htmlElement);
+	$(`#${COMPLETED_TASKS_DIV_NAME}`).prepend(htmlElement);
 }
 
 /**
@@ -282,10 +292,7 @@ function canAddTask(title){
  * @return {Number} [Number of tasks]
  */
 function getNumberOfTasks(){
-	// @TODO
-	// This should return the length of the array as opposed to
-	// the number of HTML children.
-	return existingTasks.childNodes.length;
+	return currentlyActiveTasks.length;
 }
 
 /**
@@ -303,8 +310,6 @@ function getCurrentlyActiveTaskByTitle(title){
 /**
  * Return the HTML element at the specific ID
  * 
- * @Obsolete
- * 
  * @param  {String} title [ID of the task]
  * @return {DOM Element}  [HTML element at the specified ID]
  */
@@ -317,8 +322,6 @@ function getTaskElementAtTitle(title){
 
 /**
  * Return the HTML element at the specified index
- *
- * @Obsolete
  * 
  * @param  {Number} index [Index of the task]
  * @return {DOM Element}  [HTML element at the specified index]
@@ -367,81 +370,11 @@ function removeCompletedTaskAtTitle(title){
 }
 
 function removeAllTasks(){
-	removeAllChildren(existingTasks);
+	Utilities.removeAllChildren(ACTIVE_TASKS_DIV_NAME);
 }
 
 function removeAllCompletedTasks(){
-	removeAllChildren(completedTasks);
-}
-
-/**
- * Save a cookie with a specified key and value, making sure that it is
- * a site-wide cookie.
- */
-function setCookie(key, value){
-	document.cookie = `${key}=${value}; Path=/;`;
-}
-
-/**
- * Search for a cookies value given its key. Using some string methods,
- * split the cookie so we can extract its value and return it.
- * @param  {String} key [Name of the cookie]
- * @return {String}     [Value of the found cookie]
- */
-function getCookie(key){
-	if(_.isEmpty(document.cookie))
-		return "";
-
-	/*
-		Cookies follow this pattern:
-
-		cookieName=cookieValue; anotherCookieName=anotherCookieValue	
-	 */
-
-	const cookies = document.cookie.split(';');
-
-	// @TODO
-	// Test this forEach. With extremely limited testing it appears
-	// to not load the cookies and with no errors in the console.
-	/*
-	cookies.forEach((element, index) => {
-		const cookie = element.split('=');
-		const cookieKey = _.trim(cookie[0]);
-		const cookieValue = cookie[1];
-
-		if(cookieKey == key)
-			return cookieValue;
-	});
-	*/
-
-	for(let i = 0; i < cookies.length; i++){
-		const cookie = cookies[i].split('=');
-		const cookieKey = _.trim(cookie[0]);
-		const cookieValue = cookie[1];
-
-		if(cookieKey == key)
-			return cookieValue;
-	}
-}
-
-/**
- * Set a cookies value to an empty value and set its expiry to as early as
- * possible paying attention to that it uses UNIX (EPOCH?) time so cannot be 
- * earlier than 1970.
- * @param  {String} key [Name of cookie to delete]
- */
-function deleteCookie(key){
-	document.cookie = `${key}=; Path=/; expires=Thur, 01 Jan 1970 00:00:00 GMT`;
-}
-
-/**
- * Check whether a cookie with a given key exists. It is classed as existing 
- * as long as it is not empty according to Lodash.
- * @param  {String} key [Name of the cookie]
- * @return {Boolean}    [Whether the cookie is not empty]
- */
-function doesCookieExist(key){
-	return !_.isEmpty(getCookie(key));
+	Utilities.removeAllChildren(COMPLETED_TASKS_DIV_NAME);
 }
 
 /**
